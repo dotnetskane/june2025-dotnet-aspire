@@ -1,4 +1,5 @@
 using AspireStarter.ApiService;
+using Microsoft.AspNetCore.Mvc;
 using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -122,6 +123,11 @@ app.MapGet("/my-environment-variable", (IConfiguration configuration) =>
 {
     var myVariable = configuration["MY_ENVIRONMENT_VARIABLE"] ?? "VARIABLE_NOT_FOUND";
     return Results.Ok(new { MyEnvironmentVariable = myVariable });
+});
+
+app.MapGet("/config", ([FromServices] IConfiguration configuration) =>
+{
+    return (configuration as IConfigurationRoot)?.GetDebugView();
 });
 
 app.MapDefaultEndpoints();
