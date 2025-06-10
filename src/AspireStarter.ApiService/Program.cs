@@ -1,4 +1,5 @@
 using AspireStarter.ApiService;
+using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,6 +14,7 @@ builder.AddAzureTableClient("AzureTableStorage", settings =>
 });
 
 // Add services to the container.
+builder.Services.AddOpenApi();
 builder.Services.AddProblemDetails();
 
 builder.Services.AddSingleton<TodoService>();
@@ -26,6 +28,9 @@ var summaries = new[]
 {
     "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
 };
+
+app.MapOpenApi();
+app.MapScalarApiReference("/");
 
 app.MapGet("/weatherforecast", () =>
 {
@@ -111,6 +116,12 @@ app.MapDelete("/todos/{id}", async (string id, TodoService todoService) =>
 {
     await todoService.DeleteTodoAsync(id);
     return Results.NoContent();
+});
+
+app.MapGet("/my-environment-variable", (IConfiguration configuration) =>
+{
+    var myVariable = configuration["MY_ENVIRONMENT_VARIABLE"] ?? "VARIABLE_NOT_FOUND";
+    return Results.Ok(new { MyEnvironmentVariable = myVariable });
 });
 
 app.MapDefaultEndpoints();
