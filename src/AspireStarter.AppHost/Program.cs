@@ -17,4 +17,8 @@ var apiService = builder.AddProject<Projects.AspireStarter_ApiService>("apiservi
 builder.AddProject<Projects.AspireStarter_Web>("webfrontend")
     .WithReference(apiService);
 
+builder.AddProject<Projects.AspireStarter_Web>("webfrontend")
+    .WithExternalHttpEndpoints()
+    .WithReference(apiService);
+
 builder.Build().Run();
