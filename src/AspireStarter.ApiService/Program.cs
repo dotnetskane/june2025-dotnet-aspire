@@ -8,7 +8,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.AddServiceDefaults();
 
 // Configure Azure Table Storage for Todo items
-builder.AddAzureTableClient("AzureTableStorage", settings =>
+builder.AddAzureTableServiceClient("AzureTableStorage", settings =>
 {
     settings.ConnectionString = builder.Configuration.GetConnectionString("tables")
         ?? "UseDevelopmentStorage=true"; // Default to Azurite for local development
