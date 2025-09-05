@@ -17,9 +17,13 @@ var apiService = builder.AddProject<Projects.AspireStarter_ApiService>("apiservi
     .WithEnvironment("MY_ENVIRONMENT_VARIABLE", "HELLO_DOTNET_SKANE")
     .WithEnvironment("TABLE_STORAGE_CONNECTION_STRING", () => storage.GetEndpoint("table").Url);
 
-builder.AddProject<Projects.AspireStarter_Web>("webfrontend")
+builder.AddProject<Projects.AspireStarter_Web>("webfrontend-blazor")
     .WithExternalHttpEndpoints()
     .WithReference(apiService)
     .WithEnvironment("MY_ENVIRONMENT_VARIABLE", apiService.GetEndpoint("http"));
+
+builder.AddNpmApp("webfrontend-svelte", "../aspire-svelte", "dev")
+    .WithReference(apiService)
+    .WithHttpEndpoint(env: "PORT");
 
 builder.Build().Run();

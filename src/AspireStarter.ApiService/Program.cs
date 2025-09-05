@@ -20,6 +20,16 @@ builder.Services.AddProblemDetails();
 
 builder.Services.AddSingleton<TodoService>();
 
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(policy =>
+    {
+        policy.AllowAnyOrigin()
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -131,6 +141,8 @@ app.MapGet("/config", ([FromServices] IConfiguration configuration) =>
 });
 
 app.MapDefaultEndpoints();
+
+app.UseCors();
 
 app.Run();
 
