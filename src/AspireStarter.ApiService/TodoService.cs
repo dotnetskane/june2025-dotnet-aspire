@@ -43,6 +43,7 @@ public class TodoService
         todo.PartitionKey = "todo";
         todo.RowKey = string.IsNullOrEmpty(todo.RowKey) ? Guid.NewGuid().ToString() : todo.RowKey;
         todo.Timestamp = DateTimeOffset.UtcNow;
+        todo.CreatedAt = DateTimeOffset.UtcNow;
 
         await _tableClient.UpsertEntityAsync(todo);
         return todo;

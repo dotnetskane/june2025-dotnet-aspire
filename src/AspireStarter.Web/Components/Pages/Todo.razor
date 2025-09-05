@@ -1,5 +1,5 @@
 @page "/todo"
-@inject TodoApiClient TodoApi
+@inject TodoApiClient TodoApiClient
 
 <PageTitle>Todo List</PageTitle>
 
@@ -96,25 +96,25 @@ else
 
     private async Task LoadTodos()
     {
-        todos = await TodoApi.GetTodosAsync();
+        todos = await TodoApiClient.GetTodosAsync();
         StateHasChanged();
     }
 
     private async Task Submit()
     {
-        await TodoApi.CreateTodoAsync(Model);
+        await TodoApiClient.CreateTodoAsync(Model);
         await LoadTodos();
     }
 
     private async Task UpdateTodoStatus(TodoItem todo)
     {
-        await TodoApi.UpdateTodoAsync(todo);
+        await TodoApiClient.UpdateTodoAsync(todo);
         await LoadTodos();
     }
 
     private async Task DeleteTodo(string id)
     {
-        await TodoApi.DeleteTodoAsync(id);
+        await TodoApiClient.DeleteTodoAsync(id);
         await LoadTodos();
     }
 }

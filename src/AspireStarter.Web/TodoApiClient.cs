@@ -5,7 +5,7 @@ public class TodoApiClient(HttpClient httpClient)
     public async Task<List<TodoItem>> GetTodosAsync(CancellationToken cancellationToken = default)
     {
         var todos = await httpClient.GetFromJsonAsync<List<TodoItem>>("/todos", cancellationToken) 
-            ?? new List<TodoItem>();
+            ?? [];
         return todos;
     }
 
@@ -16,7 +16,12 @@ public class TodoApiClient(HttpClient httpClient)
 
     public async Task<TodoItem?> CreateTodoAsync(TodoItem todo, CancellationToken cancellationToken = default)
     {
-        var response = await httpClient.PostAsJsonAsync("/todos", todo, cancellationToken);
+        var response = await httpClient.PostAsJsonAsync("/todos", new TodoItemRequestDto()
+        {
+            Title = todo.Title,
+            Description = todo.Description,
+            IsComplete = todo.IsComplete
+        }, cancellationToken);
         response.EnsureSuccessStatusCode();
         return await response.Content.ReadFromJsonAsync<TodoItem>(cancellationToken: cancellationToken);
     }
@@ -32,4 +37,11 @@ public class TodoApiClient(HttpClient httpClient)
         var response = await httpClient.DeleteAsync($"/todos/{id}", cancellationToken);
         return response.IsSuccessStatusCode;
     }
+}
+
+record TodoItemRequestDto 
+{
+    public string Title { get; set; } = string.Empty;
+    public string? Description { get; set; }
+    public bool IsComplete { get; set; }
 }
