@@ -1,5 +1,6 @@
 <script lang="ts">
   import { onMount } from "svelte";
+  import type { PageProps } from "./$types";
 
   interface TodoItem {
     id: number;
@@ -10,9 +11,30 @@
   }
 
   type TodoList = TodoItem[];
-  
+
   let { data }: PageProps = $props();
   let todos: TodoList = $state(data.todos);
+
+  let selectedTodo = $state<TodoItem | null>(null);
+
+  function selectTodo(todo: TodoItem) {
+    selectedTodo = todo;
+  }
+
+  export function stopPropagation(node: HTMLElement, handler: () => void) {
+    const onClick = (event: MouseEvent) => {
+      event.stopPropagation();
+      handler();
+    };
+
+    node.addEventListener("click", onClick);
+
+    return {
+      destroy() {
+        node.removeEventListener("click", onClick);
+      },
+    };
+  }
 
   // onMount(async () => {
   //   const response = await fetch("api/todos");
@@ -30,7 +52,7 @@
     }
   }
 
-  async function addTodo(title:string, description:string) {
+  async function addTodo(title: string, description: string) {
     const response = await fetch("api/todos", {
       method: "POST",
       headers: {
@@ -45,28 +67,42 @@
       console.error("Failed to add todo");
     }
   }
-
 </script>
 
 <div class="p-8">
   <h1 class="text-4xl font-semibold mb-8">Todo List (Svelte)</h1>
 
   <div class="">
-
-    <div class="flex items-center mb-4">
+    <div
+      class="flex flex-col space-y-4 w-1/2 mt-10 p-4 border border-gray-300 rounded-lg shadow-sm"
+    >
       <input
         id="newTodoInput"
         type="text"
         placeholder="Add a new todo"
-        class="border border-gray-300 rounded-lg p-2 mr-2 flex-grow"
+        class="border border-gray-300 rounded-lg p-2"
       />
+      <textarea
+        rows="2"
+        placeholder="Description"
+        class="border border-gray-300 rounded px-4 py-2 resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
+      ></textarea>
+
       <button
-        class="bg-indigo-600 text-white rounded-lg px-4 py-2"
+        class="self-start bg-indigo-600 text-white rounded-lg px-4 py-2"
         onclick={() => {
-          const el = document.getElementById('newTodoInput') as HTMLInputElement;
-          if (!el || !el.value.trim()) return;
-          addTodo(el.value.trim(), "This is a new todo item");
-          el.value = "";
+          const title = document.getElementById(
+            "newTodoInput"
+          ) as HTMLInputElement;
+          if (!title || !title.value.trim()) return;
+          const description = document.querySelector(
+            "textarea"
+          ) as HTMLTextAreaElement;
+          if (!description || !description.value.trim()) return;
+
+          addTodo(title.value.trim(), description.value.trim());
+          title.value = "";
+          description.value = "";
         }}
       >
         Add Todo
@@ -74,10 +110,10 @@
     </div>
 
     <table
-      class="table-auto min-w-full divide-y divide-gray-200 border border-gray-300 rounded-lg overflow-hidden shadow-sm"
+      class="table-auto min-w-full mt-10 divide-y divide-gray-200 border border-gray-300 rounded-lg overflow-hidden shadow-sm"
     >
       <thead
-        class="font-bold p-4 border-b uppercase text-left bg-indigo-700 text-white"
+        class="font-bold p-4 border-b uppercase text-left bg-indigo-600 text-white"
       >
         <tr>
           <th class="px-4 py-2">Title</th>
@@ -116,7 +152,10 @@
       </thead>
       <tbody class="bg-white divide-y divide-gray-200">
         {#each todos as todo}
-          <tr class="odd:bg-white even:bg-gray-50 hover:bg-gray-100">
+          <tr
+            class="odd:bg-white even:bg-gray-50 hover:bg-gray-100"
+            onclick={() => selectTodo(todo)}
+          >
             <td class="px-4 py-2 whitespace-nowrap">{todo.title}</td>
             <td class="px-4 py-2 whitespace-nowrap">{todo.description}</td>
             <td class="px-4 py-2 whitespace-nowrap"
@@ -128,12 +167,52 @@
             <td class="px-4 py-2 whitespace-nowrap">
               <button
                 class="rounded bg-red-500 px-3 py-1 font-semibold text-white hover:text-red-900"
-                onclick={() => deleteTodo(todo.id)}>Delete</button
+                use:stopPropagation={() => deleteTodo(todo.id)}
               >
+                Delete
+              </button>
             </td>
           </tr>
         {/each}
       </tbody>
     </table>
+
+    {#if selectedTodo}
+      <div class="mt-8 flex">
+        <div
+          class="w-full max-w-md bg-white border border-gray-300 rounded-lg shadow-lg p-6"
+        >
+          <div class="flex justify-between items-center mb-4">
+            <h2 class="text-xl font-bold">{selectedTodo.title}</h2>
+            <button
+              class="text-gray-400 hover:text-gray-700"
+              aria-label="Close"
+              onclick={() => (selectedTodo = null)}
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="h-6 w-6"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            </button>
+          </div>
+          <div class="mb-2 text-gray-600 text-sm">
+            Created: {new Date(selectedTodo.createdAt).toLocaleString()}
+          </div>
+          <div class="text-gray-800 whitespace-pre-line">
+            {selectedTodo.description}
+          </div>
+        </div>
+      </div>
+    {/if}
   </div>
 </div>
