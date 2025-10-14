@@ -1,5 +1,16 @@
 namespace AspireStarter.Web;
 
+public static class WeatherApiClientExtensions
+{
+    public static void AddWeatherApiClient(this IServiceCollection services) =>
+        services.AddHttpClient<WeatherApiClient>(client =>
+        {
+            // This URL uses "https+http://" to indicate HTTPS is preferred over HTTP.
+            // Learn more about service discovery scheme resolution at https://aka.ms/dotnet/sdschemes.
+            client.BaseAddress = new("https+http://apiservice");
+        });
+}
+
 public class WeatherApiClient(HttpClient httpClient)
 {
     public async Task<WeatherForecast[]> GetWeatherAsync(int maxItems = 10, CancellationToken cancellationToken = default)

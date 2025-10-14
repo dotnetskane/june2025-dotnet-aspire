@@ -1,11 +1,22 @@
 namespace AspireStarter.Web;
 
+public static class TodoApiClientExtensions
+{
+    public static void AddTodoApiClient(this IServiceCollection services) =>
+        services.AddHttpClient<TodoApiClient>(client =>
+        {
+            // This URL uses "https+http://" to indicate HTTPS is preferred over HTTP.
+            // Learn more about service discovery scheme resolution at https://aka.ms/dotnet/sdschemes.
+            client.BaseAddress = new("https+http://apiservice");
+        });
+}
+
 public class TodoApiClient(HttpClient httpClient)
 {
     public async Task<List<TodoItem>> GetTodosAsync(CancellationToken cancellationToken = default)
     {
         var todos = await httpClient.GetFromJsonAsync<List<TodoItem>>("/todos", cancellationToken) 
-            ?? new List<TodoItem>();
+            ?? [];
         return todos;
     }
 
